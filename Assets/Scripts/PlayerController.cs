@@ -12,6 +12,11 @@ public class PlayerController : MonoBehaviour
     bool flashB = false;
     bool steps = false;
     public bool Inside = false;
+
+    [SerializeField]
+    AudioSource walking;
+
+
     public bool[] taked =
     {
         false, false, false, false, false, false
@@ -75,9 +80,9 @@ public class PlayerController : MonoBehaviour
             float x = Input.GetAxis("Horizontal");
             if(transform.position.x + (x + 0.5f) < 55 && transform.position.x + (x-0.5f) > -10)
                 transform.position += new Vector3(x, 0, 0) * speed * Time.deltaTime;
-            if(x >= 1 || x <= -1)
+            if (x >= 1 || x <= -1)
             {
-                if(!steps)
+                if (!steps)
                 {
                     ear = ear + 10 > 100 ? 100 : ear + 10;
                     earText.text = $"Συξ {ear}% ";
@@ -86,12 +91,23 @@ public class PlayerController : MonoBehaviour
                 }
 
             }
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (x != 0)
+            {
+                if (!walking.isPlaying) walking.Play();
+            }
+            
+
+            if (Input.GetKeyDown(KeyCode.F))
             {
                 flash.SetActive(!flash.activeSelf);
                 flashB = !flashB;
             }
         }
+        else
+        {
+            walking.Stop();
+        }
+
         if (Input.anyKeyDown)
         {
             float y = Input.GetAxis("Vertical");
