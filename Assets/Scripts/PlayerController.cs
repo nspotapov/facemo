@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -11,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     bool flashB = false;
     bool steps = false;
+    bool vision = false;
     public bool Inside = false;
     public bool[] taked =
     {
@@ -28,6 +30,18 @@ public class PlayerController : MonoBehaviour
     CanvasController canvas;
     [SerializeField]
     TextMeshProUGUI popup;
+    [SerializeField]
+    EnemyController enemys;
+    [SerializeField]
+    Animator animator;
+    [SerializeField]
+    AudioSource step;
+    [SerializeField]
+    AudioSource reznya;
+    [SerializeField]
+    AudioSource flashOn;
+    [SerializeField]
+    AudioSource flashOff;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -38,17 +52,35 @@ public class PlayerController : MonoBehaviour
         popup.text = text;
         yield return new WaitForSeconds(2);
         popup.text = "";
+        if (text.Contains("!!!"))
+        {
+            canvas.Pause();
+            enemys.Restart();
+            transform.position = new Vector3(0, -1.77f, 0);
+            taked = new bool[6] {false,false,false,false,false,false };
+            foreach (var item in FindObjectsByType<Interactable>(FindObjectsSortMode.None))
+            {
+                if(item.sp !=  null) 
+                    item.sp.enabled = true;
+            }
+        }
     }
     IEnumerator eyeAgr()
     {
         while (true)
         {
-            if (flashB)
+            if (flashB && !vision)
             {
                 eye = eye + 10 > 100 ? 100 : eye + 10;
                 eyeText.text = $"Глаз {eye}% ";
+                if(eye == 100)
+                {
+                    vision = true;
+                    enemys.SpawnEye(transform.position.x, gameObject);
+                    StartCoroutine(waitEye());
+                }
             }
-            else
+            else if(!vision)
             {
                 eye = eye - 5 < 0 ? 0 : eye - 5;
                 eyeText.text = $"Глаз {eye}% ";
@@ -67,6 +99,21 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(1);
         steps = false;
     }
+    IEnumerator waitEar()
+    {
+        yield return new WaitWhile(() => enemys.earspawned);
+        steps = false;
+        ear = 0;
+        earText.text = $"Ухо {ear}% ";
+
+    }
+    IEnumerator waitEye()
+    {
+        yield return new WaitWhile(() => enemys.eyespawned);
+        vision = false;
+        eye = 0;
+        eyeText.text = $"Глаз {eye}% ";
+    }
     // Update is called once per frame
     void Update()
     {
@@ -75,14 +122,40 @@ public class PlayerController : MonoBehaviour
             float x = Input.GetAxis("Horizontal");
             if(transform.position.x + (x + 0.5f) < 55 && transform.position.x + (x-0.5f) > -10)
                 transform.position += new Vector3(x, 0, 0) * speed * Time.deltaTime;
-            if(x >= 1 || x <= -1)
+            if (x < 0)
             {
-                if(!steps)
+                animator.SetBool("Left", true);
+                animator.SetBool("Right", false);
+                if(!step.isPlaying)
+                step.Play();
+            }
+            else if( x > 0) 
+            {
+                animator.SetBool("Right", true) ;
+                animator.SetBool("Left", false);
+                if(!step.isPlaying)
+                    step.Play();
+            }
+
+            if (x >= 1 || x <= -1)
+            {
+
+                if (!steps)
                 {
                     ear = ear + 10 > 100 ? 100 : ear + 10;
                     earText.text = $"Ухо {ear}% ";
                     steps = true;
-                    StartCoroutine(earDelay());
+                    if (ear == 100)
+                    {
+                        enemys.SpawnEar(transform.position.x, gameObject);
+                        StartCoroutine(waitEar());
+                    }
+                    else
+                    {
+
+                        StartCoroutine(earDelay());
+                    }
+                    
                 }
 
             }
@@ -90,7 +163,16 @@ public class PlayerController : MonoBehaviour
             {
                 flash.SetActive(!flash.activeSelf);
                 flashB = !flashB;
+                if(flashB)
+                    flashOn.Play();
+                else flashOff.Play();
             }
+        }
+        else
+        {
+            animator.SetBool("Left", false);
+            animator.SetBool("Right", false);
+            step.Pause();
         }
         if (Input.anyKeyDown)
         {
@@ -109,6 +191,12 @@ public class PlayerController : MonoBehaviour
                         {
                             StartCoroutine(popUp("переход в следующую комнатушку"));
                             transform.localPosition = new Vector3(0, 11, 0);
+                            enemys.room2 = true;
+                            enemys.Restart();
+                        }
+                        else if(interactable.name == "Дверь2")
+                        {
+                            canvas.Win();
                         }
                     }
                     else if(!Inside)
@@ -117,7 +205,16 @@ public class PlayerController : MonoBehaviour
                         ear = ear + 25 > 100 ? 100 : ear + 25;
                         earText.text = $"Ухо {ear}% ";
                         steps = true;
-                        StartCoroutine(earDelay());
+                        if (ear == 100)
+                        {
+                            enemys.SpawnEar(transform.position.x, gameObject);
+                            StartCoroutine(waitEar());
+                        }
+                        else
+                        {
+
+                            StartCoroutine(earDelay());
+                        }
                     }
                     
                 }
@@ -132,6 +229,10 @@ public class PlayerController : MonoBehaviour
                             {
                                 canvas.AddNote(i - 2);
                                 StartCoroutine(popUp("вы нашли записку, картинка позже, посмотри в дневнике")); //TODO перенести в канвас
+                            }
+                            else
+                            {
+                                StartCoroutine(popUp("Это ключ, наверное он что-то открывает"));
                             }
                             
                         }
@@ -155,7 +256,7 @@ public class PlayerController : MonoBehaviour
                 if (interactable.opened)
                 {
                     interactable.Hide();
-                    GetComponent<SpriteRenderer>().sortingOrder = 0;
+                    GetComponent<SpriteRenderer>().sortingOrder = -1;
                     Inside = true;
                     flashB = false;
                     flash.SetActive(false);
@@ -176,13 +277,25 @@ public class PlayerController : MonoBehaviour
         interactable.OpenClose();
         yield return new WaitForSeconds(0.5f);
         interactable.Hide();
-        GetComponent<SpriteRenderer>().sortingOrder = 0;
+        GetComponent<SpriteRenderer>().sortingOrder = -1;
         Inside = true;
 
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        interactable = collision.GetComponent<Interactable>();
+        if (collision.CompareTag("Enemy"))
+        {
+            if (!Inside)
+            {
+                StartCoroutine(popUp("Ты погиб!!!"));
+                reznya.Play();
+            }
+        }
+        else
+        {
+            interactable = collision.GetComponent<Interactable>();
+
+        }
         print(collision.tag);
     }
     private void OnTriggerExit2D(Collider2D collision)

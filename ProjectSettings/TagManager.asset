@@ -8,6 +8,7 @@ TagManager:
   - "\u0421\u0443\u043D\u0434\u0443\u043A"
   - "\u0411\u0440\u0430\u0442\u044C"
   - "\u0414\u0432\u0435\u0440\u044C"
+  - Enemy
   layers:
   - Default
   - TransparentFX

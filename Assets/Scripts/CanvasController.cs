@@ -23,6 +23,8 @@ public class CanvasController : MonoBehaviour
     EventSystem es;
     [SerializeField]
     GameObject GamePanel;
+    [SerializeField]
+    GameObject WinPanel;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -54,10 +56,7 @@ public class CanvasController : MonoBehaviour
         {
             if (!paused)
             { 
-                Time.timeScale = 0f; 
-                paused = true;
-                menu.SetActive(true);
-                GamePanel.SetActive(false);
+                Pause();
             }
             else if (Diary.activeSelf)
             {
@@ -68,6 +67,17 @@ public class CanvasController : MonoBehaviour
                 Continue();
             }
         }
+    }
+    public void Win()
+    {
+        WinPanel.SetActive(true);
+    }
+    public void Pause()
+    {
+        Time.timeScale = 0f;
+        paused = true;
+        menu.SetActive(true);
+        GamePanel.SetActive(false);
     }
     public void toMenu()
     {
