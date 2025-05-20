@@ -6052,7 +6052,7 @@ GameObject:
   - component: {fileID: 1381200717}
   m_Layer: 0
   m_Name: "\u0428\u043A\u0430\u04444"
-  m_TagString: "\u0411\u0440\u0430\u0442\u044C"
+  m_TagString: "\u0428\u043A\u0430\u0444"
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6075,7 +6075,7 @@ MonoBehaviour:
   audio1: {fileID: 1381200718}
   audio2: {fileID: 1381200717}
   opened: 1
-  item: 000100000000
+  item: 000000000000
 --- !u!61 &1381200714
 BoxCollider2D:
   m_ObjectHideFlags: 0

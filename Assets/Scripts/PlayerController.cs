@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     bool flashB = false;
     bool steps = false;
+    bool stepst = false;
     bool vision = false;
     public bool Inside = false;
     public bool[] taked =
@@ -126,6 +127,7 @@ public class PlayerController : MonoBehaviour
             {
                 animator.SetBool("Left", true);
                 animator.SetBool("Right", false);
+                stepst = true;
                 if(!step.isPlaying)
                 step.Play();
             }
@@ -133,6 +135,7 @@ public class PlayerController : MonoBehaviour
             {
                 animator.SetBool("Right", true) ;
                 animator.SetBool("Left", false);
+                stepst = true;
                 if(!step.isPlaying)
                     step.Play();
             }
@@ -173,6 +176,7 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("Left", false);
             animator.SetBool("Right", false);
             step.Pause();
+            stepst = false;
         }
         if (Input.anyKeyDown)
         {
@@ -287,8 +291,21 @@ public class PlayerController : MonoBehaviour
         {
             if (!Inside)
             {
-                StartCoroutine(popUp("Ты погиб!!!"));
-                reznya.Play();
+                if (collision.name.Contains("Ухо"))
+                {
+                    if (stepst)
+                    {
+                        StartCoroutine(popUp("Ты погиб!!!"));
+                        reznya.Play();
+
+                    }
+                }
+                else
+                {
+                    StartCoroutine(popUp("Ты погиб!!!"));
+                    reznya.Play();
+
+                }
             }
         }
         else
