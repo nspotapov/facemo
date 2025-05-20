@@ -2,8 +2,13 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - "\u0428\u043A\u0430\u0444"
+  - "\u0421\u0443\u043D\u0434\u0443\u043A"
+  - "\u0411\u0440\u0430\u0442\u044C"
+  - "\u0414\u0432\u0435\u0440\u044C"
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -41,3 +46,5 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default
